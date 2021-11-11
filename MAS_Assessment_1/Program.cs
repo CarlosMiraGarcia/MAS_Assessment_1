@@ -1,4 +1,5 @@
 ﻿using System;
+using MathNet.Numerics.Distributions;
 
 namespace MAS_Assessment_1
 {
@@ -6,7 +7,8 @@ namespace MAS_Assessment_1
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            
+
         }
     }
 }

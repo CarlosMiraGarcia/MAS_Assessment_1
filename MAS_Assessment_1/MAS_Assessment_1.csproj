@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
+    <PackageReference Include="MersenneTwister" Version="1.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="ActressMas">
       <HintPath>I:\Carlos - Desktop\OneDrive - Edinburgh Napier University\- University -\- 4th Year -\- Multi-Agent System\ActressMAS\ActressMas\ActressMAS v3.0\ActressMas Dll\ActressMas.dll</HintPath>
     </Reference>
