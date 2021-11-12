@@ -46,7 +46,7 @@ namespace MAS_Assessment_1
                                                                                                        //charges to buy 1kWh from it
             int priceToSellToUtility = rand.Next(MinPriceToSellToUtility, MaxPriceToSellToUtility);    //what the household's utility company
                                                                                                        //offers to buy 1kWh of renewable energy for
-            string content = $"information {demand} {generation} {priceToBuyFromUtility} {priceToSellToUtility}";
+            string content = $"Information {demand} {generation} {priceToBuyFromUtility} {priceToSellToUtility}";
             Send(senderID, content); //send the message with this information back to the household agent that requested it
             counter++;
         }
@@ -54,7 +54,7 @@ namespace MAS_Assessment_1
         {
             if (counter == Settings.NumberOfHouseholds)
             {
-                Send("auctioneer", "start");
+                Send("auctioneer", "Start");
                 counter = 0;
             }
         }

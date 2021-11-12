@@ -6,18 +6,28 @@ namespace MAS_Assessment_1
 {
     class HouseholdAgent : Agent
     {
-
         private int MinPriceSellToHousehold;
         private int MaxPiceBuyFromHousehold;
         private int PriceTosellToUtility;
         private int PriceToBuyFromUtility;
         private int Demand;
-        private int Generation;
+        private int Generated;
         private int CurrentBid;
         private bool Participating;
         private bool Buyer;
         private int FinalBalance;
         private List<string> ParametersList = new List<string>();
+        private double renewableEnergyPreference;
+        public double RenewableEnergyPreference
+        {
+            get { return renewableEnergyPreference; }
+            set
+            {
+                if (value == 2) { renewableEnergyPreference = 1.00; }
+                if (value == 3) { renewableEnergyPreference = 1.05; }
+                if (value == 4) { renewableEnergyPreference = 1.10; }
+            }
+        }
 
         public HouseholdAgent()
         {
@@ -38,11 +48,14 @@ namespace MAS_Assessment_1
                 Console.WriteLine($"\r\n\t{message.Format()}");
                 switch (action)
                 {
-                    case "start":
+                    case "Start":
                         HandleStart();
                         break;
-                    case "information":
+                    case "Information":
                         HandleInformation(parameters);
+                        break;
+                    case "BuyerOrSeller":
+                        SendInformation();
                         break;
                     default:
                         break;
@@ -54,6 +67,23 @@ namespace MAS_Assessment_1
             }
         }
 
+        private void SendInformation()
+        {
+            if (Participating && !Buyer)
+            {
+                Send("auctioneer", "Seller");
+            }
+
+            else if (Participating && Buyer)
+            {
+                Send("auctioneer", "Buyer");
+            }
+            else
+            {
+                Send("auctioneer", "NoParticipating");
+            }
+        }
+
         private void HandleInformation(string parameters)
         {
             string[] splittedString = parameters.Split(' ');
@@ -62,14 +92,14 @@ namespace MAS_Assessment_1
                 ParametersList.Add(parameter);
             }
             Demand = Convert.ToInt32(ParametersList[0]);
-            Generation = Convert.ToInt32(ParametersList[1]);
+            Generated = Convert.ToInt32(ParametersList[1]);
             PriceToBuyFromUtility = Convert.ToInt32(ParametersList[2]);
             PriceTosellToUtility = Convert.ToInt32(ParametersList[3]);
 
             CalculateProsumerValues();
 
             Console.WriteLine("Demand: {0}, Generation: {1}, PriceToBuyFromUtility: {2}, PriceTosellToUtility: {3}, Buyer: {4}, Participating: {5}",
-                Demand, Generation, PriceToBuyFromUtility, PriceTosellToUtility, Buyer, Participating);
+                Demand, Generated, PriceToBuyFromUtility, PriceTosellToUtility, Buyer, Participating);
 
         }
 
@@ -78,29 +108,24 @@ namespace MAS_Assessment_1
             Send("environmentAgent", $"RequestInformation");
         }
 
-        private void HandleBid(int receivedBid)
-        {
-            //int next = receivedBid + Settings.Increment;
-            //if (receivedBid >= _currentBid && next <= _valuation)
-            //{
-            //    _currentBid = next;
-            //    Broadcast($"bid {next}");
-            //}
-        }
-
-        private void HandleWinner(string winner)
-        {
-            //if (winner == Name)
-            //    Console.WriteLine($"[{Name}]: I have won with {_currentBid}");
-
-            //Stop();
-        }
-
         private void CalculateProsumerValues()
         {
-            if (Demand - Generation < 0) { Buyer = false; Participating = true; }
-            if (Demand - Generation > 0) { Buyer = true; Participating = true; }
-            if (Demand - Generation == 0) { Participating = false; }
+            if (Demand - Generated < 0) { Buyer = false; Participating = true; }
+            if (Demand - Generated > 0) { Buyer = true; Participating = true; }
+            if (Demand - Generated == 0) { Participating = false; }
         }
+        public int CalculateEnergyNeeds()
+        {
+            return Demand - Generated;
+        }
+        public double CalculatePriceSellToHousehold()
+        {
+            return PriceToBuyFromUtility / RenewableEnergyPreference;
+        }
+        public double CalculatePriceBuyFromHousehold()
+        {
+            return 0;
+        }
+
     }
 }
