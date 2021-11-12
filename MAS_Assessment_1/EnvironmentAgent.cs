@@ -54,7 +54,7 @@ namespace MAS_Assessment_1
         {
             if (counter == Settings.NumberOfHouseholds)
             {
-                Console.WriteLine("All set up");
+                Send("auctioneer", "start");
                 counter = 0;
             }
         }
