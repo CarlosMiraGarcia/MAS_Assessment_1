@@ -6,8 +6,8 @@ namespace MAS_Assessment_1
 {
     public class AuctioneerAgent : Agent
     {
-        private List<string> SellerList = new List<string>();
-        private List<string> BuyerList = new List<string>();
+        private List<Seller> SellerList = new List<Seller>();
+        private List<Buyer> BuyerList = new List<Buyer>();
         private int counter = 0;
         public AuctioneerAgent()
         {
@@ -20,16 +20,17 @@ namespace MAS_Assessment_1
 
         public override void Act(Message message)
         {
-            switch(message.Content)
+            message.Parse(out string action, out string parameters);
+            switch (action)
             {
                 case "Start":
                     HandleStart();
                     break;
                 case "Seller":
-                    HandleSeller(message);
+                    HandleSeller(message, parameters);
                     break;
                 case "Buyer":
-                    HandleBuyer(message);
+                    HandleBuyer(message, parameters);
                     break;
                 case "NoParticipating":
                     HandleNoParticipating(message);
@@ -43,33 +44,36 @@ namespace MAS_Assessment_1
         {
             Console.WriteLine("Auctions will start soon");
             Broadcast("BuyerOrSeller");
-
         }
         public override void ActDefault()
         {
             if (counter == Settings.NumberOfHouseholds)
             {
                 Console.WriteLine("Sellers:");
-                foreach (string seller in SellerList)
+                foreach (Seller seller in SellerList)
                 {
-                    Console.WriteLine(seller);
+                    Console.WriteLine($"ID: {seller.ID}, ToSell: {seller.AmountkWhToSell}, MinPrice: {seller.MinPriceToSell}");
                 }
                 Console.WriteLine("Buyers:");
-                foreach (string buyer in BuyerList)
+                foreach (Buyer buyer in BuyerList)
                 {
-                    Console.WriteLine(buyer);
+                    Console.WriteLine($"ID: {buyer.ID}, ToBuy: {buyer.AmountkWhToBuy}, MaxPrice: {buyer.MaxPriceToBuy}");
                 }
                 counter = 0;
             }
         }
-        private void HandleSeller(Message message)
+        private void HandleSeller(Message message, string parameters)
         {
-            SellerList.Add(message.Sender);
+            string[] parameteresArray = parameters.Split(' ');
+            Seller seller = new Seller(message.Sender, Convert.ToInt32(parameteresArray[0]), Convert.ToInt32(parameteresArray[1]));
+            SellerList.Add(seller);
             counter++;
         }
-        private void HandleBuyer(Message message)
+        private void HandleBuyer(Message message, string parameters)
         {
-            BuyerList.Add(message.Sender);
+            string[] parameteresArray = parameters.Split(' ');
+            Buyer buyer = new Buyer(message.Sender, Convert.ToInt32(parameteresArray[0]), Convert.ToInt32(parameteresArray[1]));
+            BuyerList.Add(buyer);
             counter++;
         }
         private void HandleNoParticipating(Message message)

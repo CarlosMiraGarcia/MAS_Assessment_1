@@ -6,7 +6,7 @@ namespace MAS_Assessment_1
     // https://gamedev.stackexchange.com/questions/162976/how-do-i-create-a-weighted-collection-and-then-pick-a-random-element-from-it
     public class WeightedRandomizer<T>
     {
-        private struct Item
+        public struct Item
         {
             public double weigth;
             public T itemName;
@@ -26,7 +26,7 @@ namespace MAS_Assessment_1
             });
         }
 
-        public T GetRandomItem()
+        public Item GetRandomItem()
         {
             double random = rand.NextDouble() * totalWeight; // Next double returns a floating-point between 0.0 and 1.0, which can be used to select a range from the total weight
 
@@ -34,7 +34,7 @@ namespace MAS_Assessment_1
             {
                 if (item.weigth >= random)
                 {
-                    return item.itemName;
+                    return item;
                 }
             }
 

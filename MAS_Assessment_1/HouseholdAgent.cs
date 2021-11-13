@@ -6,13 +6,14 @@ namespace MAS_Assessment_1
 {
     class HouseholdAgent : Agent
     {
-        private int MinPriceSellToHousehold;
-        private int MaxPiceBuyFromHousehold;
+        private double MinPriceSellToHousehold;
+        private double MaxPiceBuyFromHousehold;
         private int PriceTosellToUtility;
         private int PriceToBuyFromUtility;
         private int Demand;
         private int Generated;
         private int CurrentBid;
+        private int EnergyBalance;
         private bool Participating;
         private bool Buyer;
         private int FinalBalance;
@@ -23,15 +24,40 @@ namespace MAS_Assessment_1
             get { return renewableEnergyPreference; }
             set
             {
-                if (value == 2) { renewableEnergyPreference = 1.00; }
-                if (value == 3) { renewableEnergyPreference = 1.05; }
-                if (value == 4) { renewableEnergyPreference = 1.10; }
+                if (value == 0) { renewableEnergyPreference = 1.00; }
+                if (value == 1) { renewableEnergyPreference = 1.05; }
+                if (value == 2) { renewableEnergyPreference = 1.10; }
             }
         }
 
         public HouseholdAgent()
         {
+            CalculateRenewableEnergyPreference();
+        }
 
+        private void CalculateRenewableEnergyPreference()
+        {
+            WeightedRandomizer<string> preferences = new WeightedRandomizer<string>();
+            preferences.NewItem("Indiferent", 70);
+            preferences.NewItem("MildyPrefered", 20);
+            preferences.NewItem("GreatlyPrefered", 10);
+
+            WeightedRandomizer<string>.Item prefered = preferences.GetRandomItem();
+            switch (prefered.itemName)
+            {
+                case "Indiferent":
+                    RenewableEnergyPreference = 0;
+                    break;
+                case "MildyPrefered":
+                    RenewableEnergyPreference = 1;
+                    break;
+                case "GreatlyPrefered":
+                    RenewableEnergyPreference = 2;
+                    break;
+                default:
+                    RenewableEnergyPreference = 0;
+                    break;
+            }
         }
 
         public override void Setup()
@@ -71,12 +97,14 @@ namespace MAS_Assessment_1
         {
             if (Participating && !Buyer)
             {
-                Send("auctioneer", "Seller");
+                CalculatePriceSellToHousehold();
+                Send("auctioneer", $"Seller {EnergyBalance} {MinPriceSellToHousehold}");
             }
 
             else if (Participating && Buyer)
             {
-                Send("auctioneer", "Buyer");
+                CalculatePriceBuyFromHousehold();
+                Send("auctioneer", $"Buyer {Math.Abs(EnergyBalance)} {MaxPiceBuyFromHousehold}");
             }
             else
             {
@@ -95,12 +123,11 @@ namespace MAS_Assessment_1
             Generated = Convert.ToInt32(ParametersList[1]);
             PriceToBuyFromUtility = Convert.ToInt32(ParametersList[2]);
             PriceTosellToUtility = Convert.ToInt32(ParametersList[3]);
-
+            CalculateEnergyNeeds();
             CalculateProsumerValues();
 
             Console.WriteLine("Demand: {0}, Generation: {1}, PriceToBuyFromUtility: {2}, PriceTosellToUtility: {3}, Buyer: {4}, Participating: {5}",
                 Demand, Generated, PriceToBuyFromUtility, PriceTosellToUtility, Buyer, Participating);
-
         }
 
         private void HandleStart()
@@ -110,21 +137,21 @@ namespace MAS_Assessment_1
 
         private void CalculateProsumerValues()
         {
-            if (Demand - Generated < 0) { Buyer = false; Participating = true; }
-            if (Demand - Generated > 0) { Buyer = true; Participating = true; }
-            if (Demand - Generated == 0) { Participating = false; }
+            if (EnergyBalance > 0) { Buyer = false; Participating = true; }
+            if (EnergyBalance < 0) { Buyer = true; Participating = true; }
+            if (EnergyBalance == 0) { Participating = false; }
         }
-        public int CalculateEnergyNeeds()
+        public void CalculateEnergyNeeds()
         {
-            return Demand - Generated;
+            EnergyBalance = Generated - Demand;
         }
-        public double CalculatePriceSellToHousehold()
+        public void CalculatePriceSellToHousehold()
         {
-            return PriceToBuyFromUtility / RenewableEnergyPreference;
+            MinPriceSellToHousehold = PriceTosellToUtility / renewableEnergyPreference;
         }
-        public double CalculatePriceBuyFromHousehold()
+        public void CalculatePriceBuyFromHousehold()
         {
-            return 0;
+            MaxPiceBuyFromHousehold = PriceToBuyFromUtility * renewableEnergyPreference;
         }
 
     }
