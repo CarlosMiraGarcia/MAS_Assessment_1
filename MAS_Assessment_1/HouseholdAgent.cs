@@ -12,11 +12,10 @@ namespace MAS_Assessment_1
         private int PriceToBuyFromUtility;
         private int Demand;
         private int Generated;
-        private int CurrentBid;
         private int EnergyBalance;
         private bool Participating;
         private bool Buyer;
-        private int FinalBalance;
+        private double FinancialBalance;
         private List<string> ParametersList = new List<string>();
         private double renewableEnergyPreference;
         public double RenewableEnergyPreference
@@ -60,16 +59,10 @@ namespace MAS_Assessment_1
             }
         }
 
-        public override void Setup()
-        {
-        }
-
         public override void Act(Message message)
         {
             try
             {
-                int highestBid = 0;
-
                 message.Parse(out string action, out string parameters);
                 Console.WriteLine($"\r\n\t{message.Format()}");
                 switch (action)
@@ -83,6 +76,12 @@ namespace MAS_Assessment_1
                     case "BuyerOrSeller":
                         SendInformation();
                         break;
+                    case "UpdateSeller":
+                        UpdateSellerInfo(parameters);
+                        break;
+                    case "UpdateBuyer":
+                        UpdateBuyerInfo(parameters);
+                        break;
                     default:
                         break;
                 }
@@ -93,6 +92,16 @@ namespace MAS_Assessment_1
             }
         }
 
+
+        private void PopulateParameterList(string parameters)
+        {
+            ParametersList.Clear();
+            string[] splittedString = parameters.Split(' ');
+            foreach (string parameter in splittedString)
+            {
+                ParametersList.Add(parameter);
+            }
+        }
         private void SendInformation()
         {
             if (Participating && !Buyer)
@@ -111,14 +120,23 @@ namespace MAS_Assessment_1
                 Send("auctioneer", "NoParticipating");
             }
         }
+        private void UpdateSellerInfo(string parameters)
+        {
+            PopulateParameterList(parameters);
+            EnergyBalance = Convert.ToInt32(ParametersList[0]);
+            FinancialBalance = Convert.ToDouble(ParametersList[1]);
+        }
 
+        private void UpdateBuyerInfo(string parameters)
+        {
+            PopulateParameterList(parameters);
+            EnergyBalance = Convert.ToInt32(ParametersList[0]);
+            FinancialBalance = Convert.ToDouble(ParametersList[1]) * - 1;
+        }
         private void HandleInformation(string parameters)
         {
-            string[] splittedString = parameters.Split(' ');
-            foreach (string parameter in splittedString)
-            {
-                ParametersList.Add(parameter);
-            }
+            PopulateParameterList(parameters);
+
             Demand = Convert.ToInt32(ParametersList[0]);
             Generated = Convert.ToInt32(ParametersList[1]);
             PriceToBuyFromUtility = Convert.ToInt32(ParametersList[2]);
@@ -147,11 +165,11 @@ namespace MAS_Assessment_1
         }
         public void CalculatePriceSellToHousehold()
         {
-            MinPriceSellToHousehold = PriceTosellToUtility / renewableEnergyPreference;
+            MinPriceSellToHousehold = Math.Round(PriceTosellToUtility / renewableEnergyPreference, 1);
         }
         public void CalculatePriceBuyFromHousehold()
         {
-            MaxPiceBuyFromHousehold = PriceToBuyFromUtility * renewableEnergyPreference;
+            MaxPiceBuyFromHousehold = Math.Round(PriceToBuyFromUtility * renewableEnergyPreference, 1);
         }
 
     }

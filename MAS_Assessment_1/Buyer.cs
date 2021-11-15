@@ -4,18 +4,18 @@ using System.Text;
 
 namespace MAS_Assessment_1
 {
-    class Buyer
+    public class Buyer
     {
         public string ID { get; set; }
-        public int AmountkWhToBuy { get; set; }
-        public int MaxPriceToBuy { get; set; }
-        public int TotalSpent { get; set; }
+        public double AmountkWhToBuy { get; set; }
+        public double MaxPriceToBuy { get; set; }
+        public double TotalSpent { get; set; }
 
-        public Buyer(string iD, int amountkWHToBuy, int minPriceToBuy)
+        public Buyer(string iD, double amountkWHToBuy, double maxPriceToBuy)
         {
             ID = iD;
             AmountkWhToBuy = amountkWHToBuy;
-            MaxPriceToBuy = minPriceToBuy;
+            MaxPriceToBuy = maxPriceToBuy;
             TotalSpent = 0;
         }
     }

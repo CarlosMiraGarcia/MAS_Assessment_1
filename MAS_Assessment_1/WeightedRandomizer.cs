@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MAS_Assessment_1
 {
-    // https://gamedev.stackexchange.com/questions/162976/how-do-i-create-a-weighted-collection-and-then-pick-a-random-element-from-it
+    //https://gamedev.stackexchange.com/questions/162976/how-do-i-create-a-weighted-collection-and-then-pick-a-random-element-from-it
     public class WeightedRandomizer<T>
     {
         public struct Item
@@ -14,7 +14,7 @@ namespace MAS_Assessment_1
 
         private List<Item> items = new List<Item>();
         private double totalWeight;
-        private Random rand = new Random();
+        private static Random rand = new Random();
 
         public void NewItem(T item, double weight)
         {
