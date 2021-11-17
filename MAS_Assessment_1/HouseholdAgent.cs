@@ -4,28 +4,30 @@ using System.Collections.Generic;
 
 namespace MAS_Assessment_1
 {
-    class HouseholdAgent : Agent
+    internal class HouseholdAgent : Agent
     {
         private double MinPriceSellToHousehold;
         private double MaxPiceBuyFromHousehold;
-        private int PriceTosellToUtility;
-        private int PriceToBuyFromUtility;
+        private double PriceTosellToUtility;
+        private double PriceToBuyFromUtility;
         private int Demand;
         private int Generated;
         private int EnergyBalance;
-        private bool Participating;
-        private bool Buyer;
+        private bool IsParticipating;
+        private bool IsBuyer;
+        private bool IsSeller;
         private double FinancialBalance;
-        private List<string> ParametersList = new List<string>();
+        private readonly List<string> ParametersList = new List<string>();
         private double renewableEnergyPreference;
+
         public double RenewableEnergyPreference
         {
             get { return renewableEnergyPreference; }
             set
             {
                 if (value == 0) { renewableEnergyPreference = 1.00; }
-                if (value == 1) { renewableEnergyPreference = 1.05; }
-                if (value == 2) { renewableEnergyPreference = 1.10; }
+                if (value == 1) { renewableEnergyPreference = 1.01; }
+                if (value == 2) { renewableEnergyPreference = 1.02; }
             }
         }
 
@@ -37,9 +39,9 @@ namespace MAS_Assessment_1
         private void CalculateRenewableEnergyPreference()
         {
             WeightedRandomizer<string> preferences = new WeightedRandomizer<string>();
-            preferences.NewItem("Indiferent", 70);
-            preferences.NewItem("MildyPrefered", 20);
-            preferences.NewItem("GreatlyPrefered", 10);
+            preferences.NewItem("Indiferent", 85);
+            preferences.NewItem("MildyPrefered", 10);
+            preferences.NewItem("GreatlyPrefered", 5);
 
             WeightedRandomizer<string>.Item prefered = preferences.GetRandomItem();
             switch (prefered.itemName)
@@ -47,12 +49,15 @@ namespace MAS_Assessment_1
                 case "Indiferent":
                     RenewableEnergyPreference = 0;
                     break;
+
                 case "MildyPrefered":
                     RenewableEnergyPreference = 1;
                     break;
+
                 case "GreatlyPrefered":
                     RenewableEnergyPreference = 2;
                     break;
+
                 default:
                     RenewableEnergyPreference = 0;
                     break;
@@ -70,18 +75,27 @@ namespace MAS_Assessment_1
                     case "Start":
                         HandleStart();
                         break;
+
                     case "Information":
                         HandleInformation(parameters);
                         break;
+
                     case "BuyerOrSeller":
                         SendInformation();
                         break;
+
                     case "UpdateSeller":
                         UpdateSellerInfo(parameters);
                         break;
+
                     case "UpdateBuyer":
                         UpdateBuyerInfo(parameters);
                         break;
+
+                    case "Finished":
+                        HandleAuctionEnd();
+                        break;
+
                     default:
                         break;
                 }
@@ -92,6 +106,10 @@ namespace MAS_Assessment_1
             }
         }
 
+        private void HandleAuctionEnd()
+        {
+            Stop();
+        }
 
         private void PopulateParameterList(string parameters)
         {
@@ -102,15 +120,15 @@ namespace MAS_Assessment_1
                 ParametersList.Add(parameter);
             }
         }
+
         private void SendInformation()
         {
-            if (Participating && !Buyer)
+            if (IsParticipating && IsSeller)
             {
                 CalculatePriceSellToHousehold();
                 Send("auctioneer", $"Seller {EnergyBalance} {MinPriceSellToHousehold}");
             }
-
-            else if (Participating && Buyer)
+            else if (IsParticipating && IsBuyer)
             {
                 CalculatePriceBuyFromHousehold();
                 Send("auctioneer", $"Buyer {Math.Abs(EnergyBalance)} {MaxPiceBuyFromHousehold}");
@@ -120,32 +138,34 @@ namespace MAS_Assessment_1
                 Send("auctioneer", "NoParticipating");
             }
         }
+
         private void UpdateSellerInfo(string parameters)
         {
             PopulateParameterList(parameters);
-            EnergyBalance = Convert.ToInt32(ParametersList[0]);
-            FinancialBalance = Convert.ToDouble(ParametersList[1]);
+            EnergyBalance = EnergyBalance - Convert.ToInt32(ParametersList[0]);
+            FinancialBalance = Math.Round(FinancialBalance + Convert.ToDouble(ParametersList[1]), 2);
         }
 
         private void UpdateBuyerInfo(string parameters)
         {
             PopulateParameterList(parameters);
-            EnergyBalance = Convert.ToInt32(ParametersList[0]);
-            FinancialBalance = Convert.ToDouble(ParametersList[1]) * - 1;
+            EnergyBalance = EnergyBalance + Convert.ToInt32(ParametersList[0]);
+            FinancialBalance = Math.Round(FinancialBalance - Convert.ToDouble(ParametersList[1]), 2);
         }
+
         private void HandleInformation(string parameters)
         {
             PopulateParameterList(parameters);
 
             Demand = Convert.ToInt32(ParametersList[0]);
             Generated = Convert.ToInt32(ParametersList[1]);
-            PriceToBuyFromUtility = Convert.ToInt32(ParametersList[2]);
-            PriceTosellToUtility = Convert.ToInt32(ParametersList[3]);
+            PriceToBuyFromUtility = Math.Round(Convert.ToDouble(ParametersList[2]), 2);
+            PriceTosellToUtility = Math.Round(Convert.ToDouble(ParametersList[3]), 2);
             CalculateEnergyNeeds();
             CalculateProsumerValues();
 
-            Console.WriteLine("Demand: {0}, Generation: {1}, PriceToBuyFromUtility: {2}, PriceTosellToUtility: {3}, Buyer: {4}, Participating: {5}",
-                Demand, Generated, PriceToBuyFromUtility, PriceTosellToUtility, Buyer, Participating);
+            //Console.WriteLine($"{this.Name} - Demand: {Demand}, Generation: {Generated}, PriceToBuyFromUtility: {PriceToBuyFromUtility}, " +
+            //    $"PriceTosellToUtility: {PriceTosellToUtility}, Buyer: {IsBuyer}, Seller: {IsSeller}, Participating: {IsParticipating}");
         }
 
         private void HandleStart()
@@ -155,22 +175,24 @@ namespace MAS_Assessment_1
 
         private void CalculateProsumerValues()
         {
-            if (EnergyBalance > 0) { Buyer = false; Participating = true; }
-            if (EnergyBalance < 0) { Buyer = true; Participating = true; }
-            if (EnergyBalance == 0) { Participating = false; }
+            if (EnergyBalance > 0) { IsSeller = true; IsParticipating = true; }
+            if (EnergyBalance < 0) { IsBuyer = true; IsParticipating = true; }
+            if (EnergyBalance == 0) { IsParticipating = false; }
         }
+
         public void CalculateEnergyNeeds()
         {
             EnergyBalance = Generated - Demand;
         }
+
         public void CalculatePriceSellToHousehold()
         {
-            MinPriceSellToHousehold = Math.Round(PriceTosellToUtility / renewableEnergyPreference, 1);
-        }
-        public void CalculatePriceBuyFromHousehold()
-        {
-            MaxPiceBuyFromHousehold = Math.Round(PriceToBuyFromUtility * renewableEnergyPreference, 1);
+            MinPriceSellToHousehold = Math.Round(PriceTosellToUtility / renewableEnergyPreference, 2);
         }
 
+        public void CalculatePriceBuyFromHousehold()
+        {
+            MaxPiceBuyFromHousehold = Math.Round(PriceToBuyFromUtility * renewableEnergyPreference, 2);
+        }
     }
 }

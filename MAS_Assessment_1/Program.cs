@@ -5,9 +5,9 @@ namespace MAS_Assessment_1
 {
     public class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            var env = new EnvironmentMas(randomOrder: false, parallel: false);
+            var env = new EnvironmentMas(randomOrder: true, parallel: true);
 
             var auctioneerAgent = new AuctioneerAgent();
             env.Add(auctioneerAgent, "auctioneer");
@@ -22,7 +22,6 @@ namespace MAS_Assessment_1
 
             env.Start();
             Console.ReadLine();
-
         }
     }
 }

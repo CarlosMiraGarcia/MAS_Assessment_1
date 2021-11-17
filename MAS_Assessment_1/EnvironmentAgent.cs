@@ -24,6 +24,7 @@ namespace MAS_Assessment_1
         private const int MinPriceToSellToUtility = 2; //min possible price to sell 1kWh to the utility company (in pence)
         private const int MaxPriceToSellToUtility = 5; //max possible price to sell 1kWh to the utility company (in pence)
         private int counter = 0;
+
         public override void Act(Message message)
 
         {
@@ -32,6 +33,7 @@ namespace MAS_Assessment_1
                 case "RequestInformation": //this agent only responds to "information" messages
                     SendInformation(message);
                     break;
+
                 default:
                     break;
             }
@@ -42,14 +44,15 @@ namespace MAS_Assessment_1
             string senderID = message.Sender; //get the sender's name so we can reply to them
             int demand = rand.Next(MinDemand, MaxDemand); //the household's demand in kWh
             int generation = rand.Next(MinGeneration, MaxGeneration); //the household's generation in kWh
-            int priceToBuyFromUtility = rand.Next(MinPriceToBuyFromUtility, MaxPriceToBuyFromUtility); //what the household's utility company
-                                                                                                       //charges to buy 1kWh from it
-            int priceToSellToUtility = rand.Next(MinPriceToSellToUtility, MaxPriceToSellToUtility);    //what the household's utility company
-                                                                                                       //offers to buy 1kWh of renewable energy for
+            double priceToBuyFromUtility = Convert.ToDouble(rand.Next(MinPriceToBuyFromUtility * 10, MaxPriceToBuyFromUtility * 10)) / 10; //what the household's utility company
+                                                                                                                                           //charges to buy 1kWh from it
+            double priceToSellToUtility = Convert.ToDouble(rand.Next(MinPriceToSellToUtility * 10, MaxPriceToSellToUtility * 10)) / 10;    //what the household's utility company
+                                                                                                                                           //offers to buy 1kWh of renewable energy for
             string content = $"Information {demand} {generation} {priceToBuyFromUtility} {priceToSellToUtility}";
             Send(senderID, content); //send the message with this information back to the household agent that requested it
             counter++;
         }
+
         public override void ActDefault()
         {
             if (counter == Settings.NumberOfHouseholds)
