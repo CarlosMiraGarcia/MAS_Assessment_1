@@ -2,6 +2,6 @@
 {
     public class Settings
     {
-        public static int NumberOfHouseholds = 5000;
+        public static int NumberOfHouseholds = 50;
     }
 }

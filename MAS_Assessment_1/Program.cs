@@ -7,7 +7,7 @@ namespace MAS_Assessment_1
     {
         private static void Main(string[] args)
         {
-            var env = new EnvironmentMas(randomOrder: true, parallel: true);
+            var env = new EnvironmentMas(randomOrder: false, parallel: false);
 
             var auctioneerAgent = new AuctioneerAgent();
             env.Add(auctioneerAgent, "auctioneer");

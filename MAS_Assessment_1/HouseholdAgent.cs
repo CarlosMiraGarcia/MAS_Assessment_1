@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 namespace MAS_Assessment_1
 {
-    internal class HouseholdAgent : Agent
+    public class HouseholdAgent : Agent
     {
         private double MinPriceSellToHousehold;
         private double MaxPiceBuyFromHousehold;
-        private double PriceTosellToUtility;
+        private double PriceToSellToUtility;
         private double PriceToBuyFromUtility;
         private int Demand;
         private int Generated;
@@ -106,11 +106,6 @@ namespace MAS_Assessment_1
             }
         }
 
-        private void HandleAuctionEnd()
-        {
-            Stop();
-        }
-
         private void PopulateParameterList(string parameters)
         {
             ParametersList.Clear();
@@ -126,12 +121,12 @@ namespace MAS_Assessment_1
             if (IsParticipating && IsSeller)
             {
                 CalculatePriceSellToHousehold();
-                Send("auctioneer", $"Seller {EnergyBalance} {MinPriceSellToHousehold}");
+                Send("auctioneer", $"Seller {EnergyBalance} {MinPriceSellToHousehold} {PriceToSellToUtility}");
             }
             else if (IsParticipating && IsBuyer)
             {
                 CalculatePriceBuyFromHousehold();
-                Send("auctioneer", $"Buyer {Math.Abs(EnergyBalance)} {MaxPiceBuyFromHousehold}");
+                Send("auctioneer", $"Buyer {Math.Abs(EnergyBalance)} {MaxPiceBuyFromHousehold} {PriceToBuyFromUtility}");
             }
             else
             {
@@ -160,12 +155,10 @@ namespace MAS_Assessment_1
             Demand = Convert.ToInt32(ParametersList[0]);
             Generated = Convert.ToInt32(ParametersList[1]);
             PriceToBuyFromUtility = Math.Round(Convert.ToDouble(ParametersList[2]), 2);
-            PriceTosellToUtility = Math.Round(Convert.ToDouble(ParametersList[3]), 2);
+            PriceToSellToUtility = Math.Round(Convert.ToDouble(ParametersList[3]), 2);
+
             CalculateEnergyNeeds();
             CalculateProsumerValues();
-
-            //Console.WriteLine($"{this.Name} - Demand: {Demand}, Generation: {Generated}, PriceToBuyFromUtility: {PriceToBuyFromUtility}, " +
-            //    $"PriceTosellToUtility: {PriceTosellToUtility}, Buyer: {IsBuyer}, Seller: {IsSeller}, Participating: {IsParticipating}");
         }
 
         private void HandleStart()
@@ -187,12 +180,31 @@ namespace MAS_Assessment_1
 
         public void CalculatePriceSellToHousehold()
         {
-            MinPriceSellToHousehold = Math.Round(PriceTosellToUtility / renewableEnergyPreference, 2);
+            MinPriceSellToHousehold = Math.Round(PriceToSellToUtility / renewableEnergyPreference, 2);
         }
 
         public void CalculatePriceBuyFromHousehold()
         {
             MaxPiceBuyFromHousehold = Math.Round(PriceToBuyFromUtility * renewableEnergyPreference, 2);
+        }
+        private void HandleAuctionEnd()
+        {
+            while (EnergyBalance != 0)
+            {
+                if (IsBuyer)
+                {
+                    FinancialBalance -= PriceToBuyFromUtility;
+                    EnergyBalance++;
+                }
+                
+                else if (IsSeller)
+                {
+                    FinancialBalance += PriceToSellToUtility;
+                    EnergyBalance--;
+                }
+            }
+            //Console.WriteLine(FinancialBalance);
+            Stop();
         }
     }
 }

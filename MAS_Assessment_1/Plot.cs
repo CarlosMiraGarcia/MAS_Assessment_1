@@ -7,24 +7,28 @@ using System.Text;
 
 namespace MAS_Assessment_1
 {
-    public static class Plot
+    public class Plot
     {
-        public static void CreatePlot(List<double> sellerRequests, List<double> buyerRequests)
+        private List<double> orderedSellerRequests = new List<double>();
+        private List<double> orderedBuyerRequests = new List<double>();
+        private int counter = 0;
+        private double buyer100;
+        private double seller100;
+        private double maxBuyer;
+        private double maxSeller;
+        private List<double> x0List = new List<double>();
+        private List<double> x1List = new List<double>();
+        private List<double> y0List = new List<double>();
+        private List<double> y1List = new List<double>();
+
+        public void CreatePlot(List<double> sellerRequests, List<double> buyerRequests)
         {
-            var orderedSellerRequests = sellerRequests.OrderBy(x => x).ToList();
-            var orderedBuyerRequests = buyerRequests.OrderByDescending(x => x).ToList();
-            var maxBuyer = orderedBuyerRequests[0];
-            var maxSeller = orderedSellerRequests.Last();
-            var counter = 0;
-            var buyer100 = 100 / maxBuyer;
-            var seller100 = 100 / maxSeller;
-
-            List<double> x0List = new List<double>();
-            List<double> x1List = new List<double>();
-            List<double> y0List = new List<double>();
-            List<double> y1List = new List<double>();
-
-            orderedBuyerRequests = orderedBuyerRequests.OrderByDescending(x => x).ToList();
+            orderedSellerRequests = sellerRequests.OrderBy(x => x).ToList();
+            orderedBuyerRequests = buyerRequests.OrderByDescending(x => x).ToList();
+            maxBuyer = orderedBuyerRequests[0];
+            maxSeller = orderedSellerRequests.Last();
+            buyer100 = 100 / maxBuyer;
+            seller100 = 100 / maxSeller;
 
             foreach (var request in orderedBuyerRequests)
             {
@@ -42,12 +46,12 @@ namespace MAS_Assessment_1
                 y0List.Add(counter);
             }
 
-
-
             Func<float, float, PointF> p = (x, y) => new PointF(x, y);
-            var inter = FindIntersection(p((float)x1List.Max(), 0), p((float)x1List.Min(), 800), p((float)x0List.Max(), 800), p((float)x0List.Min(), 0));
+            var inter = FindIntersection(p((float)x1List.Max(), 0), p((float)x1List.Min(), x1List.Count()),
+                                         p((float)x0List.Max(), x0List.Count()), p((float)x0List.Min(), 0));
+            
+            Console.WriteLine("\nIntersection: " + inter);
 
-            Console.WriteLine("Intersection: " + inter);
             // generate data for plotting
             var y0 = x0List.ToArray();
             var x0 = y0List.ToArray();
@@ -56,8 +60,6 @@ namespace MAS_Assessment_1
 
             // create PLplot object
             var pl = new PLStream();
-
-            // use SVG backend and write to SineWaves.svg in current directory
 
             //pl.sdev("svg");
             //pl.sfnam("SineWaves.svg");
@@ -93,7 +95,7 @@ namespace MAS_Assessment_1
             pl.schr(0, 1.25);
 
             // The main title
-            pl.lab("Sellers/Buyers", "Reservation Prices", "Sellers/Buyers Request Curve");
+            pl.lab("Sellers/Buyers", "Reservation Price", "Sellers/Buyers Request Curve");
 
             // plot using different colors
             pl.col0(9);
@@ -105,6 +107,7 @@ namespace MAS_Assessment_1
             pl.eop();
         }
 
+        //https://rosettacode.org/wiki/Find_the_intersection_of_two_lines
         private static PointF FindIntersection(PointF s1, PointF e1, PointF s2, PointF e2)
         {
             float a1 = e1.Y - s1.Y;

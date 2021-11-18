@@ -10,21 +10,15 @@ namespace MAS_Assessment_1
 {
     public class AuctioneerAgent : Agent
     {
-        private List<Seller> SellerList = new List<Seller>();
-        private List<Seller> OrderedSellerList;
-        private List<Buyer> BuyerList = new List<Buyer>();
-        private List<Buyer> OrderedBuyerList;
-        private int counter = 0;
-        private double totalRequestsSell = 0;
-        private double totalRequestsBuy = 0;
+        private List<Seller> sellerList = new List<Seller>();
+        private List<Seller> orderedSellerList = new List<Seller>();
+        private List<Buyer> buyerList = new List<Buyer>();
+        private List<Buyer> orderedBuyerList = new List<Buyer>();
         private List<double> sellerRequest = new List<double>();
         private List<double> buyerRequest = new List<double>();
-        private List<double> totalPaid = new List<double>();
-
-        public AuctioneerAgent()
-        {
-        }
-
+        private int counter = 0;
+        Plot plot = new Plot();
+        Statistics statistics = new Statistics();
         public override void Setup()
         {
             Broadcast("Start");
@@ -60,7 +54,7 @@ namespace MAS_Assessment_1
         {
             Console.WriteLine();
             Console.WriteLine("/////////////////////////");
-            Console.WriteLine("Collecting Lots and Bids");
+            Console.WriteLine("Collecting Asks and Bids");
             Console.WriteLine("/////////////////////////");
             Broadcast("BuyerOrSeller");
         }
@@ -69,66 +63,21 @@ namespace MAS_Assessment_1
         {
             if (counter == Settings.NumberOfHouseholds)
             {
-                //Console.WriteLine();
-                //Console.WriteLine("///////");
-                //Console.WriteLine("Sellers");
-                //Console.WriteLine("///////");
-                //foreach (Seller seller in SellerList)
-                //{
-                //    Console.WriteLine($"ID: {seller.ID}, ToSell: {seller.AmountkWhToSell}, MinPrice: {seller.MinPriceToSell}");
-                //}
-
-                //Console.WriteLine();
-                //Console.WriteLine("///////");
-                //Console.WriteLine("Buyers");
-                //Console.WriteLine("///////");
-                //foreach (Buyer buyer in BuyerList)
-                //{
-                //    Console.WriteLine($"ID: {buyer.ID}, ToBuy: {buyer.AmountkWhToBuy}, MaxPrice: {buyer.MaxPriceToBuy}");
-                //}
-
                 counter = 0;
-
                 OrderSellers();
                 OrderBuyers();
-
                 HandleAuction();
             }
-        }
-
-        private void OrderSellers()
-        {
-            OrderedSellerList = SellerList.OrderBy(x => x.MinPriceToSell).ToList();
-
-            //Console.WriteLine("Seller order:");
-            //foreach (Seller seller in ShuffledSellerList)
-            //{
-            //    Console.WriteLine(seller.ID);
-            //}
-        }
-
-        private void OrderBuyers()
-        {
-            //ShuffleRandomiser<Buyer> buyerShuffler = new ShuffleRandomiser<Buyer>();
-            //ShuffledBuyerList = buyerShuffler.ShuffleList(BuyerList);
-            OrderedBuyerList = BuyerList.OrderBy(x => x.MaxPriceToBuy).Reverse().ToList();
-
-            //Console.WriteLine("Buyer order:");
-            //foreach (Buyer buyer in OrderedBuyerList)
-            //{
-            //    Console.WriteLine(buyer.ID);
-            //}
         }
 
         private void HandleSeller(Message message, string parameters)
         {
             string[] parameteresArray = parameters.Split(' ');
-            Seller seller = new Seller(message.Sender, Convert.ToInt32(parameteresArray[0]), Convert.ToDouble(parameteresArray[1]));
-            SellerList.Add(seller);
-            totalRequestsSell += seller.AmountkWhToSell;
+            Seller seller = new Seller(message.Sender, Convert.ToInt32(parameteresArray[0]), Convert.ToDouble(parameteresArray[1]), Convert.ToDouble(parameteresArray[2]));
+            sellerList.Add(seller);
             for (int i = seller.AmountkWhToSell; i > 0; i--)
             {
-                sellerRequest.Add(seller.MinPriceToSell);
+                sellerRequest.Add(seller.MinPriceSellToHousehold);
             }
             counter++;
         }
@@ -136,12 +85,11 @@ namespace MAS_Assessment_1
         private void HandleBuyer(Message message, string parameters)
         {
             string[] parameteresArray = parameters.Split(' ');
-            Buyer buyer = new Buyer(message.Sender, Convert.ToInt32(parameteresArray[0]), Convert.ToDouble(parameteresArray[1]));
-            BuyerList.Add(buyer);
-            totalRequestsBuy += buyer.AmountkWhToBuy;
+            Buyer buyer = new Buyer(message.Sender, Convert.ToInt32(parameteresArray[0]), Convert.ToDouble(parameteresArray[1]), Convert.ToDouble(parameteresArray[2]));
+            buyerList.Add(buyer);
             for (int i = buyer.AmountkWhToBuy; i > 0; i--)
             {
-                buyerRequest.Add(buyer.MaxPriceToBuy);
+                buyerRequest.Add(buyer.MaxPriceToBuyFromHousehold);
             }
             counter++;
         }
@@ -151,42 +99,37 @@ namespace MAS_Assessment_1
             counter++;
         }
 
-        private void UpdateSellerList()
-        {
-            OrderedSellerList.Remove(OrderedSellerList[0]);
-        }
-
-        private void UpdateBuyerList()
-        {
-            OrderedBuyerList.Remove(OrderedBuyerList[0]);
-        }
-
         private void HandleAuction()
         {
             Console.WriteLine();
             Console.WriteLine("////////////////");
             Console.WriteLine("Auctions started");
             Console.WriteLine("/////////////////");
-            while (OrderedSellerList.Count() != 0)
+            while (orderedSellerList.Count() != 0)
             {
-                if (OrderedBuyerList.Count() > 0)
+                if (orderedBuyerList.Count() > 0)
                 {
-                    if (OrderedSellerList[0].MinPriceToSell <= OrderedBuyerList[0].MaxPriceToBuy)
+                    if (orderedSellerList[0].MinPriceSellToHousehold <= orderedBuyerList[0].MaxPriceToBuyFromHousehold)
                     {
-                        double pricePaid = Math.Round((OrderedBuyerList[0].MaxPriceToBuy + OrderedSellerList[0].MinPriceToSell) / 2, 2);
+                        double pricePaid = Math.Round((orderedBuyerList[0].MaxPriceToBuyFromHousehold + orderedSellerList[0].MinPriceSellToHousehold) / 2, 2);
 
-                        OrderedSellerList[0].AmountkWhToSell -= 1;
-                        OrderedSellerList[0].TotalEarned += pricePaid;
-                        Send($"{OrderedSellerList[0].ID}", $"UpdateSeller {1} {pricePaid}");
-                        OrderedBuyerList[0].AmountkWhToBuy -= 1;
-                        OrderedBuyerList[0].TotalSpent += pricePaid;
-                        Send($"{OrderedBuyerList[0].ID}", $"UpdateBuyer {1} {pricePaid}");
-                        totalPaid.Add(pricePaid);
-                        if (OrderedSellerList[0].AmountkWhToSell == 0)
+                        orderedSellerList[0].AmountkWhToSell -= 1;
+                        orderedSellerList[0].Sales.Add(pricePaid);
+                        orderedSellerList[0].TotalEarned += pricePaid;
+                        Send($"{orderedSellerList[0].ID}", $"UpdateSeller {1} {pricePaid}");
+
+                        orderedBuyerList[0].AmountkWhToBuy -= 1;
+                        orderedBuyerList[0].Purchases.Add(pricePaid);
+                        orderedBuyerList[0].TotalSpent += pricePaid;
+                        Send($"{orderedBuyerList[0].ID}", $"UpdateBuyer {1} {pricePaid}");
+
+
+                        if (orderedSellerList[0].AmountkWhToSell == 0)
                         {
                             UpdateSellerList();
                         }
-                        if (OrderedBuyerList[0].AmountkWhToBuy == 0)
+
+                        if (orderedBuyerList[0].AmountkWhToBuy == 0)
                         {
                             UpdateBuyerList();
                         }
@@ -198,18 +141,54 @@ namespace MAS_Assessment_1
                     break;
                 }
             }
+
             Environment.Continue(1);
             Broadcast("Finished");
             Environment.Continue(1);
 
-            Console.WriteLine(totalRequestsSell);
-            Console.WriteLine(totalRequestsBuy);
-            Console.WriteLine(sellerRequest.Count());
-            Console.WriteLine(buyerRequest.Count());
+            List<double> salesList = new List<double>();
+            List<double> purchasesList = new List<double>(); ;
 
-            Plot.CreatePlot(sellerRequest, buyerRequest);
-            Console.WriteLine(totalPaid.Sum() / totalPaid.Count());
+            //Console.WriteLine("///Sales///");
+            //foreach(Seller seller in sellerList)
+            //{
+            //    Console.WriteLine(seller.ID);
+            //    foreach(double value in seller.Sales)
+            //    {
+            //        Console.WriteLine(value);
+            //    }
+            //}
+
+            //Console.WriteLine("///Purchases///");
+            //foreach (Buyer buyer in buyerList)
+            //{
+            //    Console.WriteLine(buyer.ID);
+            //    foreach (double value in buyer.Purchases)
+            //    {
+            //        Console.WriteLine(value);
+            //    }
+            //}
+
+            plot.CreatePlot(sellerRequest, buyerRequest);
+            statistics.CreateStatistics(buyerList, sellerList); ;
+
             Stop();
-        } 
+        }
+        private void OrderSellers()
+        {
+            orderedSellerList = sellerList.OrderBy(x => x.MinPriceSellToHousehold).ToList();
+        }
+        private void OrderBuyers()
+        {
+            orderedBuyerList = buyerList.OrderBy(x => x.MaxPriceToBuyFromHousehold).Reverse().ToList();
+        }
+        private void UpdateSellerList()
+        {
+            orderedSellerList.Remove(orderedSellerList[0]);
+        }
+        private void UpdateBuyerList()
+        {
+            orderedBuyerList.Remove(orderedBuyerList[0]);
+        }
     }
 }
