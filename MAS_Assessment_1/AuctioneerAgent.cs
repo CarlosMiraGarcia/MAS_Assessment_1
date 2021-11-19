@@ -1,10 +1,9 @@
 ﻿using ActressMas;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using PLplot;
-using System.Reflection;
-using System.Drawing;
+using System.Threading;
 
 namespace MAS_Assessment_1
 {
@@ -17,19 +16,24 @@ namespace MAS_Assessment_1
         private List<double> sellerRequest = new List<double>();
         private List<double> buyerRequest = new List<double>();
         private int counter = 0;
-        Plot plot = new Plot();
-        Statistics statistics = new Statistics();
+        private Plot plot = new Plot();
+        private Statistics statistics = new Statistics();
+        Stopwatch stopwatch = new Stopwatch();
+
         public override void Setup()
         {
+            stopwatch.Start();
+            Console.WriteLine("[auctioneer]: Agents, start collecting information");
             Broadcast("Start");
         }
 
         public override void Act(Message message)
         {
+            Console.WriteLine($"\t{message.Format()}");
             message.Parse(out string action, out string parameters);
             switch (action)
             {
-                case "Start":
+                case "Ready":
                     HandleStart();
                     break;
 
@@ -52,10 +56,7 @@ namespace MAS_Assessment_1
 
         private void HandleStart()
         {
-            Console.WriteLine();
-            Console.WriteLine("/////////////////////////");
-            Console.WriteLine("Collecting Asks and Bids");
-            Console.WriteLine("/////////////////////////");
+            Console.WriteLine("\n[auctioneer]: Collecting Asks and Bids");
             Broadcast("BuyerOrSeller");
         }
 
@@ -101,10 +102,7 @@ namespace MAS_Assessment_1
 
         private void HandleAuction()
         {
-            Console.WriteLine();
-            Console.WriteLine("////////////////");
-            Console.WriteLine("Auctions started");
-            Console.WriteLine("/////////////////");
+            Console.WriteLine("\n[auctioneer]: Auctions started");
             while (orderedSellerList.Count() != 0)
             {
                 if (orderedBuyerList.Count() > 0)
@@ -123,7 +121,6 @@ namespace MAS_Assessment_1
                         orderedBuyerList[0].TotalSpent += pricePaid;
                         Send($"{orderedBuyerList[0].ID}", $"UpdateBuyer {1} {pricePaid}");
 
-
                         if (orderedSellerList[0].AmountkWhToSell == 0)
                         {
                             UpdateSellerList();
@@ -137,55 +134,42 @@ namespace MAS_Assessment_1
                 }
                 else
                 {
-                    //Console.WriteLine($"Sorry {ShuffledSellerList[0].ID}, no buyer was found for your auction");
                     break;
                 }
             }
 
             Environment.Continue(1);
+            HandleFinish();
+            plot.CreatePlot(sellerRequest, buyerRequest);
+            statistics.CreateStatistics(buyerList, sellerList);  
+        }
+
+        private void HandleFinish()
+        {
+            Console.WriteLine("\n[auctioneer]: Auctions are finished");
             Broadcast("Finished");
             Environment.Continue(1);
-
-            List<double> salesList = new List<double>();
-            List<double> purchasesList = new List<double>(); ;
-
-            //Console.WriteLine("///Sales///");
-            //foreach(Seller seller in sellerList)
-            //{
-            //    Console.WriteLine(seller.ID);
-            //    foreach(double value in seller.Sales)
-            //    {
-            //        Console.WriteLine(value);
-            //    }
-            //}
-
-            //Console.WriteLine("///Purchases///");
-            //foreach (Buyer buyer in buyerList)
-            //{
-            //    Console.WriteLine(buyer.ID);
-            //    foreach (double value in buyer.Purchases)
-            //    {
-            //        Console.WriteLine(value);
-            //    }
-            //}
-
-            plot.CreatePlot(sellerRequest, buyerRequest);
-            statistics.CreateStatistics(buyerList, sellerList); ;
-
             Stop();
+
+            stopwatch.Stop();
+            Console.WriteLine("\n\nElapsed Time is {0} ms", stopwatch.ElapsedMilliseconds);
         }
+
         private void OrderSellers()
         {
             orderedSellerList = sellerList.OrderBy(x => x.MinPriceSellToHousehold).ToList();
         }
+
         private void OrderBuyers()
         {
             orderedBuyerList = buyerList.OrderBy(x => x.MaxPriceToBuyFromHousehold).Reverse().ToList();
         }
+
         private void UpdateSellerList()
         {
             orderedSellerList.Remove(orderedSellerList[0]);
         }
+
         private void UpdateBuyerList()
         {
             orderedBuyerList.Remove(orderedBuyerList[0]);

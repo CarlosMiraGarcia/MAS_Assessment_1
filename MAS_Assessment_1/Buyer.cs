@@ -10,6 +10,7 @@ namespace MAS_Assessment_1
         public double PriceToBuyFromUtility { get; set; }
         public double TotalSpent { get; set; }
         public List<double> Purchases { get; set; }
+
         public Buyer(string iD, int amountkWHToBuy, double maxPriceToBuyFromHousehold, double priceToBuyFromUtility)
         {
             ID = iD;

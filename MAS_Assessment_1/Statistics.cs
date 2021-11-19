@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace MAS_Assessment_1
 {
@@ -53,47 +52,9 @@ namespace MAS_Assessment_1
             purchasesList = purchasesList.OrderBy(x => x).ToList();
             salesList = salesList.OrderBy(x => x).ToList();
 
-            Console.WriteLine("Please, make the console full screen to allow all statistic to fit the screen,");
-            Console.WriteLine("otherwise, the console won't be able to display them.");
+            Console.WriteLine("\n\n--> Please, make the console full screen to allow all the statistic to fit in the screen,");
+            Console.WriteLine("--> otherwise, the console won't be able to display them.");
             FlushConsole();
-
-            WriteAt("#############################", 50, line++);
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.ForegroundColor = ConsoleColor.Black;
-            WriteAt("           STATISTICS          ", 49, line++);
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
-            WriteAt("#############################", 50, line++);
-
-
-            line++;
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.ForegroundColor = ConsoleColor.Black;
-            WriteAt(" Total sellers:                      ", 46, ++line);
-            WriteAt(" " + Convert.ToString(sellerList.Count) + " ", 75, line);
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
-            WriteAt(" Total buyers: ", 46, ++line);
-            WriteAt(" " + Convert.ToString(buyerList.Count) + " ", 75, line);
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.ForegroundColor = ConsoleColor.Black;
-            WriteAt(" Total non participant:              ", 46, ++line);
-            WriteAt(" " + Convert.ToString(Settings.NumberOfHouseholds - sellerList.Count - buyerList.Count) + " ", 75, line);
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
-            WriteAt(" Total households: ", 46, ++line);
-            WriteAt(" " + Convert.ToString(Settings.NumberOfHouseholds) + " ", 75, line);
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.ForegroundColor = ConsoleColor.Black;
-            WriteAt(" Total transactions:                 ", 46, ++line);
-            WriteAt(" " + Convert.ToString(salesList.Count) + " ", 75, line);
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
-
-            FlushConsole();
-            line = 0;
-
-            var averageTransaction = Math.Round(totalSales / totalNumberSales, 2);
 
             WriteAt("#######################", 50, line++);
             Console.BackgroundColor = ConsoleColor.White;
@@ -167,7 +128,7 @@ namespace MAS_Assessment_1
             Console.BackgroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Black;
             line++;
-            WriteAt(" ID " , 7, ++line);
+            WriteAt(" ID ", 7, ++line);
             WriteAt(" Purchased ", 22, line);
             WriteAt(" Unpurchased ", 34, line);
             WriteAt(" Total Spent ", 49, line);
@@ -216,11 +177,79 @@ namespace MAS_Assessment_1
             Console.ForegroundColor = ConsoleColor.White;
 
             FlushConsole();
-        }
+            line = 0;
 
+            WriteAt("#############################", 50, line++);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt("           STATISTICS          ", 49, line++);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt("#############################", 50, line++);
+
+            line++;
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt(" Total sellers:                          ", 44, ++line);
+            WriteAt(" " + Convert.ToString(sellerList.Count) + " ", 72, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt(" Total buyers: ", 46, ++line);
+            WriteAt(" " + Convert.ToString(buyerList.Count) + " ", 72, line);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt(" Total non participant:                  ", 44, ++line);
+            WriteAt(" " + Convert.ToString(Settings.NumberOfHouseholds - sellerList.Count - buyerList.Count) + " ", 72, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt(" Total households: ", 46, ++line);
+            WriteAt(" " + Convert.ToString(Settings.NumberOfHouseholds) + " ", 72, line);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt(" Total transactions:                     ", 44, ++line);
+            WriteAt(" " + Convert.ToString(salesList.Count) + " ", 72, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt(" Avg % Profit per Seller:                ", 44, ++line);
+            WriteAt(" " + Math.Round(totalSalesWithUtility / totalSalesOnlyUtility * 100, 2) + "% ", 72, line);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt(" Avg % Savings per Buyers:               ", 44, ++line);
+            WriteAt(" " + Math.Round(totalPurchasesWithUtility / totalPurchaseOnlyUtility * 100, 2) + "% ", 72, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt(" Max Value Transaction:                  ", 44, ++line);
+            WriteAt(" £" + salesList.Max() + " ", 72, line);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt(" Min Value Transaction:                  ", 44, ++line);
+            WriteAt(" £" + salesList.Min() + " ", 72, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt(" Total profit for sellers:               ", 44, ++line);
+            WriteAt(" £" + Math.Round(totalExtraSellers, 2) + " ", 72, line);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt(" Total savings for buyers:               ", 44, ++line);
+            WriteAt(" £" + Math.Round(totalSavingsBuyers, 2) + " ", 72, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt(" Avg profit per seller:                  ", 44, ++line);
+            WriteAt(" £" + Math.Round(totalExtraSellers / sellerList.Count, 2) + " ", 72, line);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt(" Avg savings per buyer:                  ", 44, ++line);
+            WriteAt(" £" + Math.Round(totalSavingsBuyers / buyerList.Count, 2) + " ", 72, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+
+            Console.WriteLine("\n\n\nPress any key to exit");
+            var averageTransaction = Math.Round(totalSales / totalNumberSales, 2);
+        }
 
         //https://docs.microsoft.com/en-us/dotnet/api/system.console.setcursorposition?view=net-5.0#System_Console_SetCursorPosition_System_Int32_System_Int32_
         protected static int origRow;
+
         protected static int origCol;
 
         protected static void WriteAt(string s, int x, int y)
@@ -246,6 +275,3 @@ namespace MAS_Assessment_1
         }
     }
 }
-
-
-

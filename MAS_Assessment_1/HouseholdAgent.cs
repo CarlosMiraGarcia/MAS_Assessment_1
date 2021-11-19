@@ -69,7 +69,7 @@ namespace MAS_Assessment_1
             try
             {
                 message.Parse(out string action, out string parameters);
-                Console.WriteLine($"\r\n\t{message.Format()}");
+                Console.WriteLine($"\t{message.Format()}");
                 switch (action)
                 {
                     case "Start":
@@ -115,6 +115,23 @@ namespace MAS_Assessment_1
                 ParametersList.Add(parameter);
             }
         }
+        private void HandleStart()
+        {
+            Send("environmentAgent", "RequestInformation");
+        }
+
+        private void HandleInformation(string parameters)
+        {
+            PopulateParameterList(parameters);
+
+            Demand = Convert.ToInt32(ParametersList[0]);
+            Generated = Convert.ToInt32(ParametersList[1]);
+            PriceToBuyFromUtility = Math.Round(Convert.ToDouble(ParametersList[2]), 2);
+            PriceToSellToUtility = Math.Round(Convert.ToDouble(ParametersList[3]), 2);
+
+            CalculateEnergyNeeds();
+            CalculateProsumerValues();
+        }
 
         private void SendInformation()
         {
@@ -148,24 +165,6 @@ namespace MAS_Assessment_1
             FinancialBalance = Math.Round(FinancialBalance - Convert.ToDouble(ParametersList[1]), 2);
         }
 
-        private void HandleInformation(string parameters)
-        {
-            PopulateParameterList(parameters);
-
-            Demand = Convert.ToInt32(ParametersList[0]);
-            Generated = Convert.ToInt32(ParametersList[1]);
-            PriceToBuyFromUtility = Math.Round(Convert.ToDouble(ParametersList[2]), 2);
-            PriceToSellToUtility = Math.Round(Convert.ToDouble(ParametersList[3]), 2);
-
-            CalculateEnergyNeeds();
-            CalculateProsumerValues();
-        }
-
-        private void HandleStart()
-        {
-            Send("environmentAgent", $"RequestInformation");
-        }
-
         private void CalculateProsumerValues()
         {
             if (EnergyBalance > 0) { IsSeller = true; IsParticipating = true; }
@@ -187,6 +186,7 @@ namespace MAS_Assessment_1
         {
             MaxPiceBuyFromHousehold = Math.Round(PriceToBuyFromUtility * renewableEnergyPreference, 2);
         }
+
         private void HandleAuctionEnd()
         {
             while (EnergyBalance != 0)
@@ -196,14 +196,12 @@ namespace MAS_Assessment_1
                     FinancialBalance -= PriceToBuyFromUtility;
                     EnergyBalance++;
                 }
-                
                 else if (IsSeller)
                 {
                     FinancialBalance += PriceToSellToUtility;
                     EnergyBalance--;
                 }
             }
-            //Console.WriteLine(FinancialBalance);
             Stop();
         }
     }

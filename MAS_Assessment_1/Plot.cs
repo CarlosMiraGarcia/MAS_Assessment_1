@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 
 namespace MAS_Assessment_1
 {
@@ -49,8 +48,8 @@ namespace MAS_Assessment_1
             Func<float, float, PointF> p = (x, y) => new PointF(x, y);
             var inter = FindIntersection(p((float)x1List.Max(), 0), p((float)x1List.Min(), x1List.Count()),
                                          p((float)x0List.Max(), x0List.Count()), p((float)x0List.Min(), 0));
-            
-            Console.WriteLine("\nIntersection: " + inter);
+
+            //Console.WriteLine("\nIntersection: " + inter);
 
             // generate data for plotting
             var y0 = x0List.ToArray();
@@ -60,9 +59,6 @@ namespace MAS_Assessment_1
 
             // create PLplot object
             var pl = new PLStream();
-
-            //pl.sdev("svg");
-            //pl.sfnam("SineWaves.svg");
 
             pl.sdev("pngcairo");
             pl.sfnam("SellersRequestCurve.png");

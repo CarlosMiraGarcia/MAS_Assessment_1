@@ -28,12 +28,16 @@ namespace MAS_Assessment_1
         public override void Act(Message message)
 
         {
+            message.Parse(out string action, out string parameters);
+            Console.WriteLine($"\t{message.Format()}");
             switch (message.Content)
             {
                 case "RequestInformation": //this agent only responds to "information" messages
                     SendInformation(message);
                     break;
-
+                case "Finished":
+                    HandleFinish();
+                    break;
                 default:
                     break;
             }
@@ -57,9 +61,13 @@ namespace MAS_Assessment_1
         {
             if (counter == Settings.NumberOfHouseholds)
             {
-                Send("auctioneer", "Start");
+                Send("auctioneer", "Ready");
                 counter = 0;
             }
+        }
+        private void HandleFinish()
+        {
+            Stop();
         }
     }
 }

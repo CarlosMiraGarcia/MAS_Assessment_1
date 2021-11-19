@@ -10,6 +10,7 @@ namespace MAS_Assessment_1
         public double PriceToSellToUtility { get; set; }
         public double TotalEarned { get; set; }
         public List<double> Sales { get; set; }
+
         public Seller(string iD, int amountkWHToSell, double minPriceToSellToUtility, double priceTosellToUtility)
         {
             ID = iD;
