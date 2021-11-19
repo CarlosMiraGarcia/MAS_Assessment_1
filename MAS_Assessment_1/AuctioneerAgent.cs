@@ -140,7 +140,7 @@ namespace MAS_Assessment_1
 
             Environment.Continue(1);
             HandleFinish();
-            plot.CreatePlot(sellerRequest.ToArray(), buyerRequest.ToArray());
+            plot.CreatePlot(sellerRequest.ToArray(), buyerRequest.ToArray(), "requests", "requests");
             statistics.CreateStatistics(buyerList, sellerList);  
         }
 
