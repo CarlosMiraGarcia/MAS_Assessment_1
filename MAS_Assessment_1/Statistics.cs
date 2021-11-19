@@ -14,14 +14,19 @@ namespace MAS_Assessment_1
             double totalSales = 0;
             double totalPurchases = 0;
             double totalPurchasesWithUtility = 0;
+            double totalSalesWithUtility = 0;
             double totalPurchaseOnlyUtility = 0;
+            double totalSalesOnlyUtility = 0;
             double totalSavingsBuyers = 0;
+            double totalExtraSellers = 0;
             int totalAsksUnsold = 0;
             int totalBidsUnsold = 0;
-
             List<double> purchasesList = new List<double>();
             List<double> salesList = new List<double>();
             int line = 0;
+
+            int saveBufferWidth = Console.BufferWidth;
+            Console.SetBufferSize(saveBufferWidth, short.MaxValue - 1);
 
             foreach (Seller seller in sellerList)
             {
@@ -48,87 +53,130 @@ namespace MAS_Assessment_1
             purchasesList = purchasesList.OrderBy(x => x).ToList();
             salesList = salesList.OrderBy(x => x).ToList();
 
+            Console.WriteLine("Please, make the console full screen to allow all statistic to fit the screen,");
+            Console.WriteLine("otherwise, the console won't be able to display them.");
             FlushConsole();
 
-            Console.Clear();
-            WriteAt("########################################", 2, line++);
-            WriteAt("############## STATISTICS ##############", 2, line++);
-            WriteAt("########################################", 2, line++);
-            WriteAt("Transactions", 2, ++line);
-            line++;
-            WriteAt("Count:", 5, ++line);
-            WriteAt("Sale Value:", 15, line);
-            WriteAt("Purchase Value:", 30, line);
-            for (int i = 0; i < purchasesList.Count; i++)
-            {
-                WriteAt(Convert.ToString(i + 1), 7, ++line);
-                WriteAt("£" + salesList[i], 18, line);
-                WriteAt("£" + purchasesList[i], 35, line);
+            WriteAt("#############################", 50, line++);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt("           STATISTICS          ", 49, line++);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt("#############################", 50, line++);
 
-                if (line > 30000)
-                {
-                    FlushConsole();
-                    line = 0;
-                }
-            }
 
             line++;
-            WriteAt("Total sellers: ", 2, ++line);
-            WriteAt(Convert.ToString(sellerList.Count), 25, line);
-            WriteAt("Total buyers: ", 2, ++line);
-            WriteAt(Convert.ToString(buyerList.Count), 25, line);
-            WriteAt("Total non participant: ", 2, ++line);
-            WriteAt(Convert.ToString(Settings.NumberOfHouseholds - sellerList.Count - buyerList.Count), 25, line);
-            WriteAt("Total households: ", 2, ++line);
-            WriteAt(Convert.ToString(Settings.NumberOfHouseholds), 25, line);
-            WriteAt("Total transactions: ", 2, ++line);
-            WriteAt(Convert.ToString(salesList.Count), 25, line);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt(" Total sellers:                      ", 46, ++line);
+            WriteAt(" " + Convert.ToString(sellerList.Count) + " ", 75, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt(" Total buyers: ", 46, ++line);
+            WriteAt(" " + Convert.ToString(buyerList.Count) + " ", 75, line);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt(" Total non participant:              ", 46, ++line);
+            WriteAt(" " + Convert.ToString(Settings.NumberOfHouseholds - sellerList.Count - buyerList.Count) + " ", 75, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt(" Total households: ", 46, ++line);
+            WriteAt(" " + Convert.ToString(Settings.NumberOfHouseholds) + " ", 75, line);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt(" Total transactions:                 ", 46, ++line);
+            WriteAt(" " + Convert.ToString(salesList.Count) + " ", 75, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
 
             FlushConsole();
             line = 0;
 
             var averageTransaction = Math.Round(totalSales / totalNumberSales, 2);
 
-            WriteAt("#######################", 2, line++);
-            WriteAt("####### SELLERS #######", 2, line++);
-            WriteAt("#######################", 2, line++);
-            WriteAt("ID:", 5, ++line);
-            WriteAt("Number of Sales:", 25, line);
-            WriteAt("Value:", 48, line);
-            WriteAt("Unsold Items:", 60, line);
+            WriteAt("#######################", 50, line++);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt("        SELLERS         ", 49, line++);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt("#######################", 50, line++);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            line++;
+            WriteAt(" ID ", 7, ++line);
+            WriteAt(" Sold ", 25, line);
+            WriteAt(" Unsold Lots ", 34, line);
+            WriteAt(" Total Received ", 49, line);
+            WriteAt(" Received + Utility ", 67, line);
+            WriteAt(" Total if Only Utility ", 89, line);
+            WriteAt(" Extra £ ", 117, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+
             foreach (Seller seller in sellerList)
             {
+                double salesAsksPlusUtility = seller.AmountkWhToSell * seller.PriceToSellToUtility + seller.TotalEarned;
+                totalSalesWithUtility += salesAsksPlusUtility;
+                double salesOnlyUtility = (seller.AmountkWhToSell + seller.Sales.Count) * seller.PriceToSellToUtility;
+                totalSalesOnlyUtility += salesOnlyUtility;
+                totalExtraSellers += salesAsksPlusUtility - salesOnlyUtility;
+
                 WriteAt(seller.ID, 2, ++line);
-                WriteAt(Convert.ToString(seller.Sales.Count), 30, line);
-                WriteAt("£" + Math.Round(seller.TotalEarned, 2), 48, line);
-                WriteAt(Convert.ToString(seller.AmountkWhToSell), 65, line);
-
-                if (line > 30000)
-                {
-                    FlushConsole();
-                    line = 0;
-                }
+                WriteAt(" " + Convert.ToString(seller.Sales.Count) + " kWh ", 25, line);
+                WriteAt(" " + Convert.ToString(seller.AmountkWhToSell) + " kWh ", 37, line);
+                WriteAt(" £" + Math.Round(seller.TotalEarned, 2) + " ", 52, line);
+                WriteAt(" £" + Convert.ToString(Math.Round(salesAsksPlusUtility, 2)) + " ", 72, line);
+                WriteAt(" £" + Convert.ToString(Math.Round(salesOnlyUtility, 2)) + " ", 96, line);
+                WriteAt(" £" + Convert.ToString(Math.Round(salesAsksPlusUtility - salesOnlyUtility, 2)) + " ", 118, line);
             }
-
             line++;
-            WriteAt("Total:", 2, ++line);
-            WriteAt(Convert.ToString(totalNumberSales), 30, line);
-            WriteAt("£" + Math.Round(totalSales, 2), 48, line);
-            WriteAt(Convert.ToString(totalAsksUnsold), 65, line);
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt(" Total: ", 2, ++line);
+            WriteAt(" " + Convert.ToString(totalNumberSales) + " kWh ", 25, line);
+            WriteAt(" " + Convert.ToString(totalAsksUnsold) + " kWh ", 36, line);
+            WriteAt(" £" + Math.Round(totalSales, 2) + " ", 53, line);
+            WriteAt(" £" + Math.Round(totalSalesWithUtility, 2) + " ", 72, line);
+            WriteAt(" £" + Math.Round(totalSalesOnlyUtility, 2) + " ", 96, line);
+            WriteAt(" £" + Math.Round(totalExtraSellers, 2) + " ", 118, line);
+
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            line++;
+            WriteAt(" Sold ", 25, ++line);
+            WriteAt(" Unsold Lots ", 34, line);
+            WriteAt(" Total Received ", 49, line);
+            WriteAt(" Received + Utility ", 67, line);
+            WriteAt(" Total if Only Utility ", 89, line);
+            WriteAt(" Extra £ ", 117, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
 
             FlushConsole();
             line = 0;
 
-            WriteAt("#######################", 2, line++);
-            WriteAt("####### BUYERS ########", 2, line++);
-            WriteAt("#######################", 2, line++);
-            WriteAt("ID:", 5, ++line);
-            WriteAt("Purchased:", 25, line);
-            WriteAt("To buy left:", 40, line);
-            WriteAt("Total Spent:", 57, line);
-            WriteAt("Total Spent + Utility:", 74, line);
-            WriteAt("Total if Only Utility:", 102, line);
-            WriteAt("Saved:", 132, line);
+            WriteAt("#######################", 50, line++);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            WriteAt("         BUYERS          ", 49, line++);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt("#######################", 50, line++);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            line++;
+            WriteAt(" ID " , 7, ++line);
+            WriteAt(" Purchased ", 22, line);
+            WriteAt(" Unpurchased ", 34, line);
+            WriteAt(" Total Spent ", 49, line);
+            WriteAt(" Total Spent + Utility ", 64, line);
+            WriteAt(" Total if Only Utility ", 89, line);
+            WriteAt(" Saved £ ", 117, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+
             foreach (Buyer buyer in buyerList)
             {
                 double purchasesBidsPlusUtility = buyer.AmountkWhToBuy * buyer.PriceToBuyFromUtility + buyer.TotalSpent;
@@ -138,25 +186,36 @@ namespace MAS_Assessment_1
                 totalSavingsBuyers += purchasesOnlyUtility - purchasesBidsPlusUtility;
 
                 WriteAt(buyer.ID, 2, ++line);
-                WriteAt(Convert.ToString(buyer.Purchases.Count), 29, line);
-                WriteAt(Convert.ToString(buyer.AmountkWhToBuy), 45, line);
-                WriteAt("£" + Math.Round(buyer.TotalSpent, 2), 60, line);
-                WriteAt("£" + Convert.ToString(Math.Round(purchasesBidsPlusUtility, 2)), 83, line);
-                WriteAt("£" + Convert.ToString(Math.Round(purchasesOnlyUtility, 2)), 109, line);
-                WriteAt("£" + Convert.ToString(Math.Round(purchasesOnlyUtility - purchasesBidsPlusUtility, 2)), 132, line);
+                WriteAt(Convert.ToString(buyer.Purchases.Count) + " kWh", 25, line);
+                WriteAt(Convert.ToString(buyer.AmountkWhToBuy) + " kWh", 38, line);
+                WriteAt("£" + Math.Round(buyer.TotalSpent, 2), 52, line);
+                WriteAt("£" + Convert.ToString(Math.Round(purchasesBidsPlusUtility, 2)), 72, line);
+                WriteAt("£" + Convert.ToString(Math.Round(purchasesOnlyUtility, 2)), 98, line);
+                WriteAt("£" + Convert.ToString(Math.Round(purchasesOnlyUtility - purchasesBidsPlusUtility, 2)), 118, line);
             }
             line++;
-            WriteAt("Total:", 2, ++line);
-            WriteAt(Convert.ToString(totalNumberPurchases), 29, line);
-            WriteAt(Convert.ToString(totalBidsUnsold), 45, line);
-            WriteAt("£" + Math.Round(totalPurchases, 2), 60, line);
-            WriteAt("£" + Math.Round(totalPurchasesWithUtility, 2), 83, line);
-            WriteAt("£" + Math.Round(totalPurchaseOnlyUtility, 2), 109, line);
-            WriteAt("£" + Math.Round(totalSavingsBuyers, 2), 132, line);
-
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt(" Total: ", 2, ++line);
+            WriteAt(" " + Convert.ToString(totalNumberPurchases) + " kWh ", 24, line);
+            WriteAt(" " + Convert.ToString(totalBidsUnsold) + " kWh ", 37, line);
+            WriteAt(" £" + Math.Round(totalPurchases, 2) + " ", 51, line);
+            WriteAt(" £" + Math.Round(totalPurchasesWithUtility, 2) + " ", 71, line);
+            WriteAt(" £" + Math.Round(totalPurchaseOnlyUtility, 2) + " ", 97, line);
+            WriteAt(" £" + Math.Round(totalSavingsBuyers, 2) + " ", 117, line);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            line++;
+            WriteAt(" Purchased ", 22, ++line);
+            WriteAt(" Unpurchased ", 34, line);
+            WriteAt(" Total Spent ", 49, line);
+            WriteAt(" Total Spent + Utility ", 64, line);
+            WriteAt(" Total if Only Utility ", 89, line);
+            WriteAt(" Saved £ ", 117, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
 
             FlushConsole();
-            line = 0;
         }
 
 
@@ -183,8 +242,6 @@ namespace MAS_Assessment_1
             Console.WriteLine("\n\nPlease, press Enter to continue");
             Console.Out.Flush();
             Console.ReadLine();
-            int saveBufferWidth = Console.BufferWidth;
-            Console.SetBufferSize(saveBufferWidth, short.MaxValue - 1);
             Console.Clear();
         }
     }
