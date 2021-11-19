@@ -6,9 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
-    <PackageReference Include="MersenneTwister" Version="1.0.6" />
-    <PackageReference Include="PLplot" Version="5.13.7" />
+    <PackageReference Include="OxyPlot.Core" Version="2.1.0" />
+    <PackageReference Include="OxyPlot.Core.Drawing" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
