@@ -9,18 +9,18 @@ namespace MAS_Assessment_1
         {
             var env = new EnvironmentMas(randomOrder: false, parallel: false);
 
-            var auctioneerAgent = new AuctioneerAgent();
-            env.Add(auctioneerAgent, "auctioneer");
-            var environmentAgent = new EnvironmentAgent();
-            env.Add(environmentAgent, "environmentAgent");
-
-            for (int i = 1; i <= Settings.NumberOfHouseholds; i++)
+            for (int i = 1; i <= EnvironmentAgent.NumberOfHouseholds; i++) //creates all the household agents
             {
-                var householdAgent = new HouseholdAgent();
-                env.Add(householdAgent, $"householdAgent" + i);
+                var householdAgent = new HouseholdAgent(); //creates a new householdAgent object
+                env.Add(householdAgent, $"householdAgent" + i); //adds the new agent to the environment with a unique name
             }
 
-            env.Start();
+            var auctioneerAgent = new AuctioneerAgent(); //creates a new auctioneerAgent object
+            env.Add(auctioneerAgent, "auctioneer"); //adds the auctioneer agent to the environment
+            var environmentAgent = new EnvironmentAgent(); //creates a new environmentAgent object
+            env.Add(environmentAgent, "environmentAgent");//adds the environment agent to the environment
+
+            env.Start(); //starts the simulation
             Console.ReadLine();
         }
     }

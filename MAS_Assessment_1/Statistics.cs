@@ -20,9 +20,17 @@ namespace MAS_Assessment_1
             double totalExtraSellers = 0;
             int totalAsksUnsold = 0;
             int totalBidsUnsold = 0;
+            double unsoldSeller = 0;
+            double unsoldBuyer1 = 0;
+            double unsoldBuyer11 = 0;
+            double unsoldBuyer12 = 0;
+            int line = 0;
             List<double> purchasesList = new List<double>();
             List<double> salesList = new List<double>();
-            int line = 0;
+            List<double> sellerAVG = new List<double>();
+            List<double> preferenceBuyer1AVG = new List<double>();
+            List<double> preferenceBuyer11AVG = new List<double>();
+            List<double> preferenceBuyer12AVG = new List<double>();
 
             int saveBufferWidth = Console.BufferWidth;
             Console.SetBufferSize(saveBufferWidth, short.MaxValue - 1);
@@ -36,6 +44,15 @@ namespace MAS_Assessment_1
                     salesList.Add(sale);
                     totalSales += sale;
                 }
+
+                if (seller.Sales.Count > 0)
+                {
+                    foreach (double sale in seller.Sales)
+                    {
+                        sellerAVG.Add(sale);
+                    }
+                }
+                else { unsoldSeller++; }
             }
 
             foreach (Buyer buyer in buyerList)
@@ -46,6 +63,40 @@ namespace MAS_Assessment_1
                 {
                     purchasesList.Add(purchase);
                     totalPurchases += purchase;
+                }
+
+                if (buyer.Preference == 1)
+                {
+                    if (buyer.Purchases.Count > 0)
+                    {
+                        foreach (double sale in buyer.Purchases)
+                        {
+                            preferenceBuyer1AVG.Add(sale);
+                        }
+                    }
+                    else { unsoldBuyer1++; }
+                }
+                if (buyer.Preference == 1.15)
+                {
+                    if (buyer.Purchases.Count > 0)
+                    {
+                        foreach (double sale in buyer.Purchases)
+                        {
+                            preferenceBuyer11AVG.Add(sale);
+                        }
+                    }
+                    else { unsoldBuyer11++; }
+                }
+                if (buyer.Preference == 1.3)
+                {
+                    if (buyer.Purchases.Count > 0)
+                    {
+                        foreach (double sale in buyer.Purchases)
+                        {
+                            preferenceBuyer12AVG.Add(sale);
+                        }
+                    }
+                    else { unsoldBuyer12++; }
                 }
             }
 
@@ -194,16 +245,16 @@ namespace MAS_Assessment_1
             WriteAt(" " + Convert.ToString(sellerList.Count) + " ", 72, line);
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.White;
-            WriteAt(" Total buyers: ", 46, ++line);
+            WriteAt(" Total buyers:                          ", 44, ++line);
             WriteAt(" " + Convert.ToString(buyerList.Count) + " ", 72, line);
             Console.BackgroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Black;
             WriteAt(" Total non participant:                  ", 44, ++line);
-            WriteAt(" " + Convert.ToString(Settings.NumberOfHouseholds - sellerList.Count - buyerList.Count) + " ", 72, line);
+            WriteAt(" " + Convert.ToString(EnvironmentAgent.NumberOfHouseholds - sellerList.Count - buyerList.Count) + " ", 72, line);
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.White;
-            WriteAt(" Total households: ", 46, ++line);
-            WriteAt(" " + Convert.ToString(Settings.NumberOfHouseholds) + " ", 72, line);
+            WriteAt(" Total households:                          ", 44, ++line);
+            WriteAt(" " + Convert.ToString(EnvironmentAgent.NumberOfHouseholds) + " ", 72, line);
             Console.BackgroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Black;
             WriteAt(" Total transactions:                     ", 44, ++line);
@@ -243,8 +294,52 @@ namespace MAS_Assessment_1
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.White;
 
+            double sellerAVGTotal = Math.Round(sellerAVG.Sum() / sellerAVG.Count, 2);
+            double preferenceBuyer1AVGTotal = Math.Round(preferenceBuyer1AVG.Sum() / preferenceBuyer1AVG.Count, 2);
+            double preferenceBuyer11AVGTotal = Math.Round(preferenceBuyer11AVG.Sum() / preferenceBuyer11AVG.Count, 2);
+            double preferenceBuyer12AVGTotal = Math.Round(preferenceBuyer12AVG.Sum() / preferenceBuyer12AVG.Count, 2);
+
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            line += 5;
+            WriteAt("Sellers:                                                                                ", 1, line);
+            WriteAt(" AVG final ask value ", 27, line);
+            WriteAt(" Unfinished asks ", 50, line);
+            WriteAt(" % Unfinished asks ", 68, line);
+            WriteAt(" Total Asks ", 90, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt("£" + Convert.ToString(sellerAVGTotal), 35, ++line);
+            WriteAt(Convert.ToString(unsoldSeller), 57, line);
+            WriteAt(Convert.ToString(Math.Round((unsoldSeller / sellerAVG.Count() * 100), 2)) + "%", 77, line);
+            WriteAt(Convert.ToString((sellerAVG.Count() + unsoldSeller)), 95, line);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            line++;
+            WriteAt("Buyers:                                                                                ", 1, line);
+            WriteAt(" AVG final bid value ", 27, line);
+            WriteAt(" Unfinished bids ", 50, line);
+            WriteAt(" % Unfinished bids ", 68, line);
+            WriteAt(" Total bids ", 90, line);
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            WriteAt(" Indifferent", 2, ++line);
+            WriteAt("£" + Convert.ToString(preferenceBuyer1AVGTotal), 35, line);
+            WriteAt(Convert.ToString(unsoldBuyer1), 57, line);
+            WriteAt(Convert.ToString(Math.Round((unsoldBuyer1 / preferenceBuyer1AVG.Count() * 100), 2)) + "%", 77, line);
+            WriteAt(Convert.ToString((preferenceBuyer1AVG.Count() + unsoldBuyer1)), 95, line);
+            WriteAt(" Mildly Preferred", 2, ++line);
+            WriteAt("£" + Convert.ToString(preferenceBuyer11AVGTotal), 35, line);
+            WriteAt(Convert.ToString(unsoldBuyer11), 57, line);
+            WriteAt(Convert.ToString(Math.Round((unsoldBuyer11 / preferenceBuyer11AVG.Count() * 100), 2)) + "%", 77, line);
+            WriteAt(Convert.ToString((preferenceBuyer11AVG.Count() + unsoldBuyer11)), 95, line);
+            WriteAt(" Greatly Preferred", 2, ++line);
+            WriteAt("£" + Convert.ToString(preferenceBuyer12AVGTotal), 35, line);
+            WriteAt(Convert.ToString(unsoldBuyer12), 57, line);
+            WriteAt(Convert.ToString(Math.Round((unsoldBuyer12 / preferenceBuyer12AVG.Count() * 100), 2)) + "%", 77, line);
+            WriteAt(Convert.ToString((preferenceBuyer12AVG.Count() + unsoldBuyer12)), 95, line);
+
             Console.WriteLine("\n\n\nPress any key to exit");
-            var averageTransaction = Math.Round(totalSales / totalNumberSales, 2);
         }
 
         //https://docs.microsoft.com/en-us/dotnet/api/system.console.setcursorposition?view=net-5.0#System_Console_SetCursorPosition_System_Int32_System_Int32_
